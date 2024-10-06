@@ -283,8 +283,12 @@ class DES(object):
         return self.converter.from_bin(result, hexstring=kwargs.get('hexresult', False))
 
     def decrypt(self, string, **kwargs):
-        return self.encrypt(string, decrypt=True, **kwargs)
-
+        # Jika opsi 'output_hexstring' diaktifkan, return hasil sebagai hex string
+        if kwargs.get('output_hexstring', False):
+            return self.encrypt(string, decrypt=True, hexresult=True, **kwargs)
+        # Jika tidak, asumsikan output adalah unicode
+        else:
+            return self.encrypt(string, decrypt=True, **kwargs)
 
 # Aplikasi CLI untuk enkripsi dan dekripsi
 def main():
@@ -326,10 +330,22 @@ def main():
             print("\nAnda memilih Dekripsi.")
             encrypted_text = input("Masukkan teks yang dienkripsi: ").strip()
             key = input("Masukkan kunci (hexstring): ").strip()
+            print("Apakah output yang diinginkan dalam format hexstring atau unicode?")
+            output_format = input("Ketik 'hexstring' atau 'unicode': ").strip().lower()
 
             try:
-                decrypted_text = des.decrypt(encrypted_text, hexstring=True, key=key, hexkey=True)
-                print(f"Hasil Dekripsi: {decrypted_text}")
+                # Pilih format output
+                if output_format == 'hexstring':
+                    decrypted_text = des.decrypt(encrypted_text, hexstring=True, key=key, hexkey=True, output_hexstring=True)
+                    print(f"Hasil Dekripsi (hexstring): {decrypted_text}")
+
+                elif output_format == 'unicode':
+                    decrypted_text = des.decrypt(encrypted_text, hexstring=True, key=key, hexkey=True)
+                    print(f"Hasil Dekripsi (unicode): {decrypted_text}")
+
+                else:
+                    print("Format output tidak dikenali!")
+
             except Exception as e:
                 print(f"Error saat dekripsi: {e}")
 
